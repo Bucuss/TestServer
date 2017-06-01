@@ -6,80 +6,49 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Threading;
 using System.Net.Sockets;
-using System.IO;
 
 namespace TestServer
 {
     class Program
     {
-        private static byte[] result = new byte[1024];
-        private const int port = 8088;
-        private static string IpStr = "127.0.0.1";
-        private static Socket serverSocket;
+
+        #region Private param
+        private const int port = 8088;                 //端口号
+        private static string IpStr = "127.0.0.1";     //远程地址
+        #endregion
+
 
         static void Main(string[] args)
         {
             IPAddress ip = IPAddress.Parse(IpStr);
             IPEndPoint ip_end_point = new IPEndPoint(ip, port);
-            serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            serverSocket.Bind(ip_end_point);
-            serverSocket.Listen(10);
+            TcpListener listener = new TcpListener(ip_end_point);
+            List<TcpClient> clients = new List<TcpClient>();
 
-            Console.WriteLine("Start Listen {0} success", serverSocket.LocalEndPoint.ToString());
-            Thread thread = new Thread(ClientConnectListen);
-            thread.Start();
-            Console.ReadLine();
-        }
+            //开始监听
+            listener.Start();
+            Console.WriteLine("Server:{0},Start Listening....",listener.LocalEndpoint);
 
-        private static void ClientConnectListen() {
             while (true) {
-                Socket clientSocket = serverSocket.Accept();
-                Console.WriteLine("Client {0} load success", clientSocket.RemoteEndPoint.ToString());
-                ByteBuffer buffer = new ByteBuffer();
-                buffer.WriteString("Connected Server");//return data
-                clientSocket.Send(WriteMessage(buffer.ToBytes()));
-                Thread thread = new Thread(RecieveMessage);
-                thread.Start(clientSocket);
-            }
 
-        }
-
-        private static byte[] WriteMessage(byte[] message)
-        {
-            MemoryStream ms = null;
-            //using 强制资源清理
-            using (ms = new MemoryStream())
-            {
-                ms.Position = 0;
-                BinaryWriter writer = new BinaryWriter(ms);
-                ushort msglen = (ushort)message.Length;
-                writer.Write(msglen);
-                writer.Write(message);
-                writer.Flush();
-                return ms.ToArray();
-            }
-        }
-
-        private static void RecieveMessage(object clientSocket) {
-            Socket mClientSocket = (Socket)clientSocket;
-            while (true) {
-                try {
-                    int receiveNumber = mClientSocket.Receive(result);
-                    Console.WriteLine("Receive Client {0} massage , length is {1}", mClientSocket.RemoteEndPoint.ToString(), receiveNumber);
-                    ByteBuffer buff = new ByteBuffer(result);
-
-                    int len = buff.ReadShort();
-                    String data = buff.ReadString();
-                    Console.WriteLine("Data: {0}", data);
-                }
-                catch (Exception ex)
+                TcpClient client = listener.AcceptTcpClient();
+                if (clients.Count == 0 && client != null)
                 {
-                    Console.WriteLine(ex.Message);
-                    mClientSocket.Shutdown(SocketShutdown.Both);
-                    mClientSocket.Close();
-                    break;
+                    clients.Add(client);
                 }
+                else if (clients.Count > 0 && client != null)
+                {
+                    if (!clients.Contains(client))
+                    {
+                        clients.Add(client);
+                    }
+                }
+                else {
+                    return;
+                }
+                TcpServer wapper = new TcpServer(client, clients);
             }
         }
+
     }
 }
