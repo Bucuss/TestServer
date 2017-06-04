@@ -135,7 +135,7 @@ namespace TestServer
         /// <returns>返回值，是否更新成功</returns>
         public static bool updateReviewInfo(UserAndReviewInfo new_reviewInfo)
         {   
-            string updateStr = "update users set battleNum = @new_battleNum,victoryNum = @new_victoryNum,escapeNum = @new_escapeNum,singlehighestScore = @new_singlehighestScore,totalScore = @new_totalScore  where username = @username";
+            string updateStr = "update battlereview set battleNum = @new_battleNum,victoryNum = @new_victoryNum,escapeNum = @new_escapeNum,singlehighestScore = @new_singlehighestScore,totalScore = @new_totalScore  where username = @username";
             MySqlParameter[] param = { new MySqlParameter("@new_battleNum", new_reviewInfo.battleNum), new MySqlParameter("@new_victoryNum", new_reviewInfo.victoryNum), new MySqlParameter("@new_escapeNum", new_reviewInfo.escapeNum), new MySqlParameter("@new_singlehighestScore", new_reviewInfo.singlehighestScore), new MySqlParameter("@new_totalScore", new_reviewInfo.totalScore), new MySqlParameter("@username", new_reviewInfo.username) };
             MySqlHelper.ExecuteNonQuery(conn, CommandType.Text, updateStr, param);
             return true;

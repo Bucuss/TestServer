@@ -14,7 +14,7 @@ namespace TestServer
 
         #region Private param
         private const int port = 8088;                 //端口号
-        private static string IpStr = "127.0.0.1";     //远程地址
+        private static string IpStr = "0.0.0.0";     //远程地址
         #endregion
 
 
@@ -44,9 +44,10 @@ namespace TestServer
                     }
                 }
                 else {
+
                     return;
                 }
-                TcpServer wapper = new TcpServer(client, clients);
+                TcpServer wapper = new TcpServer(client, clients,out clients);
             }
         }
 

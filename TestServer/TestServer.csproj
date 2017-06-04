@@ -59,15 +59,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BatteInfo.cs" />
-    <Compile Include="ByteBuffer.cs" />
-    <Compile Include="ConectMySqldb.cs" />
-    <Compile Include="MySqlHelper.cs" />
+    <Compile Include="DataHelper\BatteInfo.cs" />
+    <Compile Include="DataHelper\ByteBuffer.cs" />
+    <Compile Include="DataHelper\CommandParam.cs" />
+    <Compile Include="MysqlHelper\ConectMySqldb.cs" />
+    <Compile Include="MysqlHelper\MySqlHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TcpServer.cs" />
-    <Compile Include="UserAndReviewInfo.cs" />
-    <Compile Include="UserInfo.cs" />
+    <Compile Include="DataHelper\UserAndReviewInfo.cs" />
+    <Compile Include="DataHelper\UserInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

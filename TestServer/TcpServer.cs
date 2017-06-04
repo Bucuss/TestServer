@@ -17,26 +17,9 @@ namespace TestServer
         private const int BufferSize = 8192;
         private byte[] buffer;
         private List<int> GameState = new List<int>();
+        private Dictionary<TcpClient, string> Name2Client = new Dictionary<TcpClient, string>();
         #endregion
 
-        #region Connect request param
-        private const int LOGIN_REQUEST = 1;            //登陆请求
-        private const int LOADING_REQUEST = 2;          //载入请求
-        private const int UPDATE_REQUEST = 3;           //更新请求
-        private const int MATCH_REQUEST = 4;            //匹配请求
-        private const int BATTLE_REQUEST = 5;           //对战请求
-        private const int IS_ONLINE = 6;                //检测在线请求
-        #endregion
-
-        #region Connect reply param
-        private const int LOGIN_SUCCESS_REPLY = 1;      //登陆成功回应
-        private const int LOGIN_FAIL_REPLY = 2;         //登陆失败回应
-        private const int LOADING_SUCCESS_REPLY = 3;    //载入成功回应
-        private const int UPDATE_FAIL_REPLY = 4;        //更新失败回应
-        private const int MATCH_SUCCESS_REPLY = 5;      //匹配成功回应
-        private const int MATCH_FAIL_REPLY = 6;         //匹配失败回应
-        private const int BATTLE_REPLY = 7;             //对战回应
-        #endregion
 
         #region Contrust funtion
         /// <summary>
@@ -44,7 +27,7 @@ namespace TestServer
         /// </summary>
         /// <param name="client">连接的客户端</param>
         /// <param name="clients">储存的客户端链表</param>
-        public TcpServer(TcpClient client,List<TcpClient> clients) {
+        public TcpServer(TcpClient client, List<TcpClient> clients,out List<TcpClient> outclients) {
             this.client = client;
             this.clients = clients;
             Console.WriteLine("\nClient Connected Local:{0} <-- Client:{1}", client.Client.LocalEndPoint, client.Client.RemoteEndPoint);
@@ -53,6 +36,7 @@ namespace TestServer
             //开始回调接受消息
             AsyncCallback callback = new AsyncCallback(ReadComplete);
             streamToClient.BeginRead(buffer, 0, BufferSize, callback, null);
+            outclients = this.clients;
         }
         #endregion
 
@@ -80,31 +64,41 @@ namespace TestServer
                 }
                 switch (getRequest(buffer))
                 {
-                    case LOGIN_REQUEST:
+                    case CommandParam.LOGIN_REQUEST:
                         //登录验证
                         UserInfo userInfo = new UserInfo();
                         bool isExitUser = ConectMySqldb.queryUserInfoByUserName(getUsername(buffer), userInfo);
                         if (isExitUser)
                         {
-                            Console.Write("username: {0} ,password: {1} ", userInfo.username, userInfo.password);
-                            temp = userInfo.WriteAsBytes(LOGIN_SUCCESS_REPLY);//返回登陆成功回应
-                            streamToClient.Write(temp, 0, temp.Length);
+                            Console.Write("\nusername: {0} ,password: {1} ", userInfo.username, userInfo.password);
+                            temp = userInfo.WriteAsBytes(CommandParam.LOGIN_SUCCESS_REPLY);//返回登陆成功回应
+                            try
+                            {
+                                Name2Client.Add(client, userInfo.username);
+                                streamToClient.Write(temp, 0, temp.Length);
+                                Console.WriteLine("ClientsCount:{0},Client:{1},username:{2}", Name2Client.Count, Name2Client.ElementAt(0).Key.Client.RemoteEndPoint, Name2Client.ElementAt(0).Value);
+                            }
+                            catch (ArgumentException ex)
+                            {
+                                sendOnlyReply(CommandParam.LOGIN_FAIL_REPLY, streamToClient);
+                                Console.WriteLine("此用户已经存在：" + ex.Message);
+                            }
                         }
                         else
                         {
-                            sendOnlyReply(LOGIN_FAIL_REPLY, streamToClient);//返回失败成功回应
+                            sendOnlyReply(CommandParam.LOGIN_FAIL_REPLY, streamToClient);//返回失败成功回应
                         }
                         break;
-                    case LOADING_REQUEST:
+                    case CommandParam.LOADING_REQUEST:
                         //载入请求
                         UserAndReviewInfo reviewInfo = new UserAndReviewInfo();
                         ConectMySqldb.queryReviewInfoByUserName(getUsername(buffer), reviewInfo);
-                        temp = reviewInfo.WriteAsBytes(LOADING_SUCCESS_REPLY);//返回载入成功回应
+                        temp = reviewInfo.WriteAsBytes(CommandParam.LOADING_SUCCESS_REPLY);//返回载入成功回应
                         streamToClient.Write(temp, 0, temp.Length);
-                        Console.WriteLine("battleNum:{0},victoryNum:{1},escapeNum:{2},singlehighestScore:{3},totalScore:{4}", reviewInfo.battleNum, reviewInfo.victoryNum, reviewInfo.escapeNum, reviewInfo.singlehighestScore, reviewInfo.totalScore);
+                        Console.WriteLine("\nbattleNum:{0},victoryNum:{1},escapeNum:{2},singlehighestScore:{3},totalScore:{4}", reviewInfo.battleNum, reviewInfo.victoryNum, reviewInfo.escapeNum, reviewInfo.singlehighestScore, reviewInfo.totalScore);
                         
                         break;
-                    case UPDATE_REQUEST:
+                    case CommandParam.UPDATE_REQUEST:
                         //更新请求
                         UserAndReviewInfo new_reviewInfo = new UserAndReviewInfo();
                         new_reviewInfo.ReadByBytes(buffer);
@@ -112,26 +106,26 @@ namespace TestServer
                         if (isUpdate)
                         {Console.WriteLine("更新成功"); }
                         else
-                        { Console.WriteLine("更新失败");sendOnlyReply(UPDATE_FAIL_REPLY, streamToClient); }
+                        { Console.WriteLine("更新失败");sendOnlyReply(CommandParam.UPDATE_FAIL_REPLY, streamToClient); }
                         break;
 
-                    case MATCH_REQUEST:
+                    case CommandParam.MATCH_REQUEST:
                         //匹配请求
                         bool isready = getIsReady(buffer, GameState);
                         if (clients.Count < 2||!isready)
                         {
-                            sendOnlyReply(MATCH_FAIL_REPLY,streamToClient);//返回匹配失败回应
+                            sendOnlyReply(CommandParam.MATCH_FAIL_REPLY,streamToClient);//返回匹配失败回应
                         }
                         else if (clients.Count == 2&&isready)
                         {
-                            sendOnlyReply(MATCH_SUCCESS_REPLY, streamToClient);//返回匹配成功回应
+                            sendOnlyReply(CommandParam.MATCH_SUCCESS_REPLY, streamToClient);//返回匹配成功回应
                         }
                         else {
-                            sendOnlyReply(MATCH_FAIL_REPLY, streamToClient);//返回匹配失败回应
+                            sendOnlyReply(CommandParam.MATCH_FAIL_REPLY, streamToClient);//返回匹配失败回应
                             return;
                         }
                         break;
-                    case BATTLE_REQUEST:
+                    case CommandParam.BATTLE_REQUEST:
                         //发送指令
                         if (clients.ElementAt(0) == this.client) {
                             sendToTargetClient(clients.ElementAt(1),buffer);
@@ -144,7 +138,7 @@ namespace TestServer
                         }
                         break;
                     default:
-                        sendOnlyReply(IS_ONLINE, streamToClient);//心跳机制
+                        sendOnlyReply(CommandParam.IS_ONLINE, streamToClient);//心跳机制
                         break;
                 }
 
@@ -154,8 +148,10 @@ namespace TestServer
             catch(Exception ex) {
 
                 if (streamToClient != null)
+                {
                     streamToClient.Dispose();
-                clients.Remove(client);
+                    clients.Remove(client);
+                }
                 client.Close();
                 Console.Write(ex.Message);
             }
@@ -219,7 +215,7 @@ namespace TestServer
             BatteInfo battleInfo = new BatteInfo();
             battleInfo.ReadByBytes(result);
             Console.WriteLine("battleInfo:dic:{0},attack:{1},dirc:{2}", battleInfo.dir,battleInfo.attack,battleInfo.dirc);
-            byte[] temp = battleInfo.WriteAsBytes(BATTLE_REPLY);//返回战斗回应和数据
+            byte[] temp = battleInfo.WriteAsBytes(CommandParam.BATTLE_REPLY);//返回战斗回应和数据
             targetstream.Write(temp, 0, temp.Length);
         }
 
