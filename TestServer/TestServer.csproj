@@ -72,15 +72,15 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DataHelper\ReviewInfo.cs" />
     <Compile Include="DataHelper\UserInfo.cs" />
-    <Compile Include="Test\AsyncTcpClient.cs" />
-    <Compile Include="Test\AsyncTcpServer.cs" />
-    <Compile Include="Test\TcpClientConnectedEventArgs.cs" />
-    <Compile Include="Test\TcpClientDisconnectedEventArgs.cs" />
-    <Compile Include="Test\TcpClientState.cs" />
-    <Compile Include="Test\TcpDatagramReceivedEventArgs.cs" />
-    <Compile Include="Test\TcpServerConnectedEventArgs.cs" />
-    <Compile Include="Test\TcpServerDisconnectedEventArgs.cs" />
-    <Compile Include="Test\TcpServerExceptionOccurredEventArgs .cs" />
+    <Compile Include="TcpClientHelper\AsyncTcpClient.cs" />
+    <Compile Include="TcpClientHelper\AsyncTcpServer.cs" />
+    <Compile Include="TcpClientHelper\TcpClientConnectedEventArgs.cs" />
+    <Compile Include="TcpClientHelper\TcpClientDisconnectedEventArgs.cs" />
+    <Compile Include="TcpClientHelper\TcpClientState.cs" />
+    <Compile Include="TcpClientHelper\TcpDatagramReceivedEventArgs.cs" />
+    <Compile Include="TcpClientHelper\TcpServerConnectedEventArgs.cs" />
+    <Compile Include="TcpClientHelper\TcpServerDisconnectedEventArgs.cs" />
+    <Compile Include="TcpClientHelper\TcpServerExceptionOccurredEventArgs .cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
