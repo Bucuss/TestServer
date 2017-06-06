@@ -20,6 +20,8 @@ namespace TestServer
         private Dictionary<TcpClient, string> Name2Client = new Dictionary<TcpClient, string>();
         #endregion
 
+        ReceviceMsg receviceMsg = new ReceviceMsg();
+        DealMsg dealMsg = new DealMsg();
 
         #region Contrust funtion
         /// <summary>
@@ -31,14 +33,23 @@ namespace TestServer
             this.client = client;
             this.clients = clients;
             Console.WriteLine("\nClient Connected Local:{0} <-- Client:{1}", client.Client.LocalEndPoint, client.Client.RemoteEndPoint);
-            streamToClient = client.GetStream();
+            this.streamToClient = client.GetStream();
             buffer = new byte[BufferSize];
             //开始回调接受消息
             AsyncCallback callback = new AsyncCallback(ReadComplete);
             streamToClient.BeginRead(buffer, 0, BufferSize, callback, null);
+            //Recevice();
             outclients = this.clients;
         }
         #endregion
+
+
+        public void Recevice() {
+            receviceMsg.ReceviceEvent += dealMsg.doDealMsg;
+            receviceMsg.doRecevice(buffer,streamToClient,client,clients);
+
+        }
+
 
         #region Private Method
         /// <summary>
@@ -62,8 +73,10 @@ namespace TestServer
                     Console.WriteLine("Client offine");
                     return;
                 }
+                Console.WriteLine(getRequest(buffer));
                 switch (getRequest(buffer))
-                {
+                {   
+                  
                     case CommandParam.LOGIN_REQUEST:
                         //登录验证
                         UserInfo userInfo = new UserInfo();
@@ -74,7 +87,7 @@ namespace TestServer
                             temp = userInfo.WriteAsBytes(CommandParam.LOGIN_SUCCESS_REPLY);//返回登陆成功回应
                             try
                             {
-                                Name2Client.Add(client, userInfo.username);
+                                Name2Client.Add(client, userInfo.username);//绑定用户名和客户端
                                 streamToClient.Write(temp, 0, temp.Length);
                                 Console.WriteLine("ClientsCount:{0},Client:{1},username:{2}", Name2Client.Count, Name2Client.ElementAt(0).Key.Client.RemoteEndPoint, Name2Client.ElementAt(0).Value);
                             }
@@ -91,7 +104,7 @@ namespace TestServer
                         break;
                     case CommandParam.LOADING_REQUEST:
                         //载入请求
-                        UserAndReviewInfo reviewInfo = new UserAndReviewInfo();
+                        ReviewInfo reviewInfo = new ReviewInfo();
                         ConectMySqldb.queryReviewInfoByUserName(getUsername(buffer), reviewInfo);
                         temp = reviewInfo.WriteAsBytes(CommandParam.LOADING_SUCCESS_REPLY);//返回载入成功回应
                         streamToClient.Write(temp, 0, temp.Length);
@@ -100,7 +113,7 @@ namespace TestServer
                         break;
                     case CommandParam.UPDATE_REQUEST:
                         //更新请求
-                        UserAndReviewInfo new_reviewInfo = new UserAndReviewInfo();
+                        ReviewInfo new_reviewInfo = new ReviewInfo();
                         new_reviewInfo.ReadByBytes(buffer);
                         bool isUpdate = ConectMySqldb.updateReviewInfo(new_reviewInfo);
                         if (isUpdate)
@@ -111,6 +124,7 @@ namespace TestServer
 
                     case CommandParam.MATCH_REQUEST:
                         //匹配请求
+                        Console.WriteLine("yes");
                         bool isready = getIsReady(buffer, GameState);
                         if (clients.Count < 2||!isready)
                         {
@@ -122,7 +136,7 @@ namespace TestServer
                         }
                         else {
                             sendOnlyReply(CommandParam.MATCH_FAIL_REPLY, streamToClient);//返回匹配失败回应
-                            return;
+                            //return;
                         }
                         break;
                     case CommandParam.BATTLE_REQUEST:
@@ -212,7 +226,7 @@ namespace TestServer
         /// <param name="result">接受消息</param>
         private void sendToTargetClient(TcpClient targetclient,byte[] result) {
             NetworkStream targetstream = targetclient.GetStream();//获取目标客户端的networkstream
-            BatteInfo battleInfo = new BatteInfo();
+            BattleInfo battleInfo = new BattleInfo();
             battleInfo.ReadByBytes(result);
             Console.WriteLine("battleInfo:dic:{0},attack:{1},dirc:{2}", battleInfo.dir,battleInfo.attack,battleInfo.dirc);
             byte[] temp = battleInfo.WriteAsBytes(CommandParam.BATTLE_REPLY);//返回战斗回应和数据

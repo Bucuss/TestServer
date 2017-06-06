@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TestServer
 {
-    public class UserInfo
+    public class UserInfo:Ipack
     {
         #region
         public string username { get; set; }    //用户名
@@ -17,7 +17,10 @@ namespace TestServer
         /// <summary>
         /// 无参构造
         /// </summary>
-        public UserInfo() { }
+        public UserInfo() {
+            this.username = "";
+            this.password = "";
+        }
 
         /// <summary>
         /// 构造函数
@@ -34,12 +37,12 @@ namespace TestServer
         /// <summary>
         /// 写入二进制流
         /// </summary>
-        /// <param name="RETURN">返回参数</param>
+        /// <param name="HeadData">返回参数</param>
         /// <returns>byte[]</returns>
-        public byte[] WriteAsBytes(int RETURN)
+        public byte[] WriteAsBytes(int HeadData)
         {
             ByteBuffer buffer = new ByteBuffer();
-            buffer.WriteInt(RETURN);
+            buffer.WriteInt(HeadData);
             buffer.WriteString(this.username);
             buffer.WriteString(this.password);
             buffer.Flush();
@@ -55,10 +58,10 @@ namespace TestServer
         {
             ByteBuffer buffer = new ByteBuffer(result);
            // int len = buffer.ReadShort();
-            int RETURN = buffer.ReadInt();
+            int HeadData = buffer.ReadInt();
             this.username = buffer.ReadString();
             this.password = buffer.ReadString();
-            return RETURN;
+            return HeadData;
         }
         #endregion
     }

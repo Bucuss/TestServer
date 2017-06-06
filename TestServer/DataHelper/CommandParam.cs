@@ -14,7 +14,8 @@ namespace TestServer
         public const int UPDATE_REQUEST = 3;           //更新请求
         public const int MATCH_REQUEST = 4;            //匹配请求
         public const int BATTLE_REQUEST = 5;           //对战请求
-        public const int IS_ONLINE = 6;                //检测在线请求
+        public const int FINSH_REQUEST = 6;            //完成对战
+        public const int IS_ONLINE = 7;                //检测在线请求
         #endregion
 
         #region Connect reply param
@@ -25,6 +26,15 @@ namespace TestServer
         public const int MATCH_SUCCESS_REPLY = 5;      //匹配成功回应
         public const int MATCH_FAIL_REPLY = 6;         //匹配失败回应
         public const int BATTLE_REPLY = 7;             //对战回应
+        #endregion
+
+        #region
+        public const int LOGIN_RETURN = 1;              //登陆返回值
+        public const int LOAD_RETURN = 2;               //载入返回值
+        public const int MATCH_RETURN = 3;              //匹配返回值
+        public const int BATTLE_RETURN = 4;             //指令返回值
+        public const int UPDATE_RETURN = 5;             //更新返回值
+        public const int FINSH_RETURN = 6;              //完成返回值
         #endregion
     }
 }

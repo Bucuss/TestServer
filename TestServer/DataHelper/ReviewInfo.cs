@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TestServer
 {
-    public class UserAndReviewInfo
+    public class ReviewInfo:Ipack
     {
         #region Public param
         public string username { get; set; }                //用户名
@@ -21,7 +21,14 @@ namespace TestServer
         /// <summary>
         /// 无参构造
         /// </summary>
-        public UserAndReviewInfo() { }
+        public ReviewInfo() {
+            this.username = "";
+            this.battleNum = 0;
+            this.victoryNum = 0;
+            this.escapeNum = 0;
+            this.singlehighestScore = 0;
+            this.totalScore = 0;
+        }
 
         /// <summary>
         /// //构造函数
@@ -32,7 +39,7 @@ namespace TestServer
         /// <param name="escapeNum">逃跑次数</param>
         /// <param name="singlehighestScore">最高分</param>
         /// <param name="totalScore">总分</param>
-        public UserAndReviewInfo(string username, int battleNum, int victoryNum, int escapeNum, int singlehighestScore, int totalScore) {
+        public ReviewInfo(string username, int battleNum, int victoryNum, int escapeNum, int singlehighestScore, int totalScore) {
             this.username = username;
             this.battleNum = battleNum;
             this.victoryNum = victoryNum;
@@ -46,13 +53,13 @@ namespace TestServer
         /// <summary>
         /// 将数据结构转换为二进制流
         /// </summary>
-        /// <param name="RETURN">返回参数</param>
+        /// <param name="HeadData">返回参数</param>
         /// 参数 RETURN 为 request or reply
         /// <returns>返回byte[]</returns>
-        public byte[] WriteAsBytes(int RETURN) {
+        public byte[] WriteAsBytes(int HeadData) {
 
             ByteBuffer buffer = new ByteBuffer();
-            buffer.WriteInt(RETURN);
+            buffer.WriteInt(HeadData);
             buffer.WriteString(this.username);
             buffer.WriteInt(this.battleNum);
             buffer.WriteInt(this.victoryNum);
@@ -71,14 +78,14 @@ namespace TestServer
         /// <returns>返回请求或回应</returns>
         public int ReadByBytes(byte[] result) {
             ByteBuffer buffer = new ByteBuffer(result);
-            int RETURN = buffer.ReadInt();
+            int HeadData = buffer.ReadInt();
             this.username = buffer.ReadString();
             this.battleNum = buffer.ReadInt();
             this.victoryNum = buffer.ReadInt();
             this.escapeNum = buffer.ReadInt();
             this.singlehighestScore = buffer.ReadInt();
             this.totalScore = buffer.ReadInt();
-            return RETURN;
+            return HeadData;
         }
         #endregion
     }

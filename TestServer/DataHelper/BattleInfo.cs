@@ -6,19 +6,20 @@ using System.Threading.Tasks;
 
 namespace TestServer
 {
-    class BatteInfo
+    class BattleInfo:Ipack
     {
         #region PUblic param
         public int dir { get; set; }            //方向
         public int attack { get; set; }         //是否攻击
         public int dirc { get; set; }           //是否持续移动
+        public int battleCode { get; private set; }  //战斗序号
         #endregion
 
         #region Contrust funtion
         /// <summary>
         /// 无参构造
         /// </summary>
-        public BatteInfo() { }
+        public BattleInfo() { }
 
         /// <summary>
         /// 构造函数
@@ -27,10 +28,11 @@ namespace TestServer
         /// <param name="attack">是否攻击</param>
         /// <param name="dirc">是否持续移动</param>
         /// 特别的，参数attack和dirc取值为(0,1)
-        public BatteInfo(int dir,int attack,int dirc) {
+        public BattleInfo(int dir,int attack,int dirc) {
             this.dir = dir;
             this.attack = attack;
             this.dirc = dirc;
+            this.battleCode = -1;
         }
         #endregion
 
@@ -38,12 +40,13 @@ namespace TestServer
         /// <summary>
         /// 写入二进制流
         /// </summary>
-        /// <param name="RETURN">返回的参数值</param>
+        /// <param name="HeadData">返回的参数值</param>
         /// <returns>byte[]</returns>
-        public byte[] WriteAsBytes(int RETURN)
+        public byte[] WriteAsBytes(int HeadData)
         {
             ByteBuffer buffer = new ByteBuffer();
-            buffer.WriteInt(RETURN);
+            buffer.WriteInt(HeadData);
+            buffer.WriteInt(this.battleCode);
             buffer.WriteInt(this.dir);
             buffer.WriteInt(this.attack);
             buffer.WriteInt(this.dirc);
@@ -59,12 +62,17 @@ namespace TestServer
         public int ReadByBytes(byte[] result)
         {
             ByteBuffer buffer = new ByteBuffer(result);
-            int RETURN = buffer.ReadInt();
+            int HeadData = buffer.ReadInt();
+            int battleCode = buffer.ReadInt();//战斗序号
             this.dir = buffer.ReadInt();
             this.attack = buffer.ReadInt();
             this.dirc = buffer.ReadInt();
-            return RETURN;
+            return HeadData;
         }
         #endregion
+
+        public void setBattelCode(int n) {
+            this.battleCode = n;
+        }
     }
 }

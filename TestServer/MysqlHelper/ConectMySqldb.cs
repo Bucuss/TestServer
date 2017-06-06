@@ -45,7 +45,8 @@ namespace TestServer
         /// <param name="username">string类型</param>
         /// <param name="uarInfo">UserAndReviewInfo类型</param>
         /// 参数类型 MySqlParameter("@username","xxx")
-        public static void queryReviewInfoByUserName(string username, UserAndReviewInfo uarInfo) {
+        public static bool queryReviewInfoByUserName(string username, ReviewInfo uarInfo) {
+            bool isExist = true;
             string queryStr = "select * from battlereview where username = @username";
             MySqlParameter param = new MySqlParameter("@username", username);
             MySqlDataReader msReader = MySqlHelper.ExecuteReader(conn, CommandType.Text, queryStr, param);
@@ -58,9 +59,13 @@ namespace TestServer
                 uarInfo.escapeNum = Convert.ToInt32(msReader["escapeNum"].ToString());
                 uarInfo.singlehighestScore = Convert.ToInt32(msReader["singlehighestScore"].ToString());
                 uarInfo.totalScore = Convert.ToInt32(msReader["totalScore"].ToString());
-
-
+                isExist = true;
             }
+            else
+            {
+                isExist = false;
+            }
+            return isExist;
         }
 
         /// <summary>
@@ -133,10 +138,14 @@ namespace TestServer
         /// </summary>
         /// <param name="new_reviewInfo">UserAndReviewInfo类型</param>
         /// <returns>返回值，是否更新成功</returns>
-        public static bool updateReviewInfo(UserAndReviewInfo new_reviewInfo)
+        public static bool updateReviewInfo(ReviewInfo new_reviewInfo)
         {   
             string updateStr = "update battlereview set battleNum = @new_battleNum,victoryNum = @new_victoryNum,escapeNum = @new_escapeNum,singlehighestScore = @new_singlehighestScore,totalScore = @new_totalScore  where username = @username";
-            MySqlParameter[] param = { new MySqlParameter("@new_battleNum", new_reviewInfo.battleNum), new MySqlParameter("@new_victoryNum", new_reviewInfo.victoryNum), new MySqlParameter("@new_escapeNum", new_reviewInfo.escapeNum), new MySqlParameter("@new_singlehighestScore", new_reviewInfo.singlehighestScore), new MySqlParameter("@new_totalScore", new_reviewInfo.totalScore), new MySqlParameter("@username", new_reviewInfo.username) };
+            MySqlParameter[] param = { new MySqlParameter("@new_battleNum", new_reviewInfo.battleNum),
+                new MySqlParameter("@new_victoryNum", new_reviewInfo.victoryNum), new MySqlParameter
+                ("@new_escapeNum", new_reviewInfo.escapeNum), new MySqlParameter("@new_singlehighestScore",
+                new_reviewInfo.singlehighestScore), new MySqlParameter("@new_totalScore", new_reviewInfo.totalScore),
+                new MySqlParameter("@username", new_reviewInfo.username) };
             MySqlHelper.ExecuteNonQuery(conn, CommandType.Text, updateStr, param);
             return true;
         }
