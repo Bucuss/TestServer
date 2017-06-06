@@ -66,13 +66,10 @@
     <Compile Include="DataHelper\Ipack.cs" />
     <Compile Include="DataHelper\MatchInfo.cs" />
     <Compile Include="DataHelper\UpdateInfo.cs" />
-    <Compile Include="DealMsg.cs" />
     <Compile Include="MysqlHelper\ConectMySqldb.cs" />
     <Compile Include="MysqlHelper\MySqlHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReceviceMsg.cs" />
-    <Compile Include="TcpServer.cs" />
     <Compile Include="DataHelper\ReviewInfo.cs" />
     <Compile Include="DataHelper\UserInfo.cs" />
     <Compile Include="Test\AsyncTcpClient.cs" />
@@ -84,7 +81,6 @@
     <Compile Include="Test\TcpServerConnectedEventArgs.cs" />
     <Compile Include="Test\TcpServerDisconnectedEventArgs.cs" />
     <Compile Include="Test\TcpServerExceptionOccurredEventArgs .cs" />
-    <Compile Include="Test\test.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

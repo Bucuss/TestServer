@@ -18,15 +18,7 @@ namespace TestServer
         public const int IS_ONLINE = 7;                //检测在线请求
         #endregion
 
-        #region Connect reply param
-        public const int LOGIN_SUCCESS_REPLY = 1;      //登陆成功回应
-        public const int LOGIN_FAIL_REPLY = 2;         //登陆失败回应
-        public const int LOADING_SUCCESS_REPLY = 3;    //载入成功回应
-        public const int UPDATE_FAIL_REPLY = 4;        //更新失败回应
-        public const int MATCH_SUCCESS_REPLY = 5;      //匹配成功回应
-        public const int MATCH_FAIL_REPLY = 6;         //匹配失败回应
-        public const int BATTLE_REPLY = 7;             //对战回应
-        #endregion
+        
 
         #region
         public const int LOGIN_RETURN = 1;              //登陆返回值
